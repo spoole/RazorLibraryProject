@@ -1,0 +1,100 @@
+﻿@using Microsoft.AspNetCore.Identity
+@inject SignInManager<IdentityUser> SignInManager
+@inject UserManager<IdentityUser> UserManager
+@using System.Security.Claims;
+@model IEnumerable<RazorLibraryProject.Models.Book>
+
+@{
+    ViewData["Title"] = "Index";
+}
+<h1>Index</h1>
+
+@{
+    if(SignInManager.IsSignedIn(User)) {
+        @if (User.IsInRole("admin")) {
+            <p>
+                <a asp-action="Create">Create New</a>
+            </p>
+        }
+        <table class="table">
+            <thead>
+                <tr>
+                    <div hidden>@Html.DisplayNameFor(model => model.Id)</div>
+                    <th>
+                        @Html.DisplayNameFor(model => model.Title)
+                    </th>
+                    <th>
+                        @Html.DisplayNameFor(model => model.AuthorLast)
+                    </th>
+                    <th>
+                        @Html.DisplayNameFor(model => model.AuthorFirst)
+                    </th>
+                    <th>
+                        @Html.DisplayNameFor(model => model.Description)
+                    </th>
+                    @if (User.IsInRole("admin"))
+                    {
+                        <th>
+                            @Html.DisplayNameFor(model => model.isAvailable)
+                        </th>
+                    }
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in Model)
+                {
+                    if (((Book)item).isAvailable && User.IsInRole("borrower")) {
+                        <tr>
+                            <div hidden>@Html.DisplayNameFor(modelitem => item.Id)</div>
+                            <td>
+                                @Html.DisplayFor(modelItem => item.Title)
+                            </td>
+                            <td>
+                                @Html.DisplayFor(modelItem => item.AuthorLast)
+                            </td>
+                            <td>
+                                @Html.DisplayFor(modelItem => item.AuthorFirst)
+                            </td>
+                            <td>
+                                @Html.DisplayFor(modelItem => item.Description)
+                            </td>
+                            <td>
+                                <p><a asp-action="Details" asp-route-id="@item.Id">Details</a></p>|
+                                <p><a asp-action="Edit" asp-route-id="@item.Id" formaction="post">Check Out</a></p>
+                            </td>
+                        </tr>
+                    } else if (User.IsInRole("admin"))
+                    {
+                        <tr>
+                            <div hidden>@Html.DisplayNameFor(modelitem => item.Id)</div>
+                            <td>
+                                @Html.DisplayFor(modelItem => item.Title)
+                            </td>
+                            <td>
+                                @Html.DisplayFor(modelItem => item.AuthorLast)
+                            </td>
+                            <td>
+                                @Html.DisplayFor(modelItem => item.AuthorFirst)
+                            </td>
+                            <td>
+                                @Html.DisplayFor(modelItem => item.Description)
+                            </td>
+                            <td>
+                                @Html.DisplayFor(modelItem => item.isAvailable)
+                            </td>
+                            <td>
+                                <p><a asp-action="Edit" asp-route-id="@item.Id">Edit</a></p>|
+                                <p><a asp-action="Delete" asp-route-id="@item.Id">Delete</a></p>|
+                                <p><a asp-action="Edit" asp-route-id="@item.Id" formaction="post">Check In</a></p>
+                            </td>
+                        </tr>
+                    }
+                }
+            </tbody>
+        </table>
+    } else
+    {
+        <h1>You'll need to sign in to peruse our catalog.</h1>
+    }
+}
