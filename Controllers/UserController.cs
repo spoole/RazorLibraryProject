@@ -9,27 +9,28 @@ using Microsoft.AspNetCore.Identity;
 using RazorLibraryProject.Models;
 using RazorLibraryProject.Data;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.Extensions.Configuration.UserSecrets;
 
 namespace RazorLibraryProject.Controllers
 {
-    public class UserAdminController : Controller
+    public class UserController : Controller
     {
         private readonly ApplicationDbContext _context;
 
-        public UserAdminController(ApplicationDbContext context)
+        public UserController(ApplicationDbContext context)
         {
             _context = context;
         }
 
-        // GET: UserAdmin
+        // GET: User
         public async Task<IActionResult> Index()
         {
-            return _context.UserAdmin != null ?
-                        View(await _context.UserAdmin.ToListAsync()) :
-                        Problem("Entity set 'ApplicationDbContext.UserAdmin'  is null.");
+            return _context.User != null ?
+                        View(await _context.User.ToListAsync()) :
+                        Problem("Entity set 'ApplicationDbContext.User'  is null.");
         }
 
-        // GET: UserAdmin/Details/#
+        // GET: User/Details/#
         public async Task<IActionResult> Details(string id)
         {
             if (_context.Users == null)
@@ -53,17 +54,18 @@ namespace RazorLibraryProject.Controllers
             return View();
         }        
 
-        // POST: UserAdmin/Create
+        // POST: User/Create
         // To protect from overposting attacks, enable the specific properties you want to bind to.
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [Authorize(Roles = "admin")]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("UserName","Email","EmailConfirmed","PhoneNumber","PhoneNumberConfirmed")] IdentityUser user,
-            string role)
+        public async Task<IActionResult> Create([Bind("UserName","Email","PhoneNumber","PasswordHash")] User user, string role)
         {
             if (ModelState.IsValid)
             {
+                user.Id = Guid.NewGuid().ToString();
+                user.NormalizedUserName = user.UserName.ToLower();
                 _context.Add(user);
                 IdentityRole fullRole = _context.Roles.FirstOrDefault(x => x.Name == role);
                 await _context.SaveChangesAsync();
@@ -72,16 +74,16 @@ namespace RazorLibraryProject.Controllers
             return View(user);
         }
 
-        // GET: UserAdmin/Edit
+        // GET: User/Edit
         [Authorize(Roles = "admin")]
         public async Task<IActionResult> Edit(string id)
         {
-            if (_context.UserAdmin == null)
+            if (_context.User == null)
             {
                 return NotFound();
             }
 
-            var user = await _context.UserAdmin.FindAsync(id);
+            var user = await _context.User.FindAsync(id);
             if (user == null)
             {
                 return NotFound();
@@ -89,14 +91,14 @@ namespace RazorLibraryProject.Controllers
             return View(user);
         }
 
-        // POST: UserAdmin/Edit
+        // POST: User/Edit
         // To protect from overposting attacks, enable the specific properties you want to bind to.
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [Authorize(Roles = "admin")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(string roleId, 
-            [Bind("Username,Email,EmailConfirmed,PhoneNumber,PhoneNumberConfirmed,PasswordHash,LockedOut")] IdentityUser user)
+            [Bind("Username,Email,EmailConfirmed,PhoneNumber,PhoneNumberConfirmed,PasswordHash,LockedOut")] User user)
         {
             if (ModelState.IsValid)
             {
@@ -121,16 +123,16 @@ namespace RazorLibraryProject.Controllers
             return View(user);
         }
 
-        // GET: UserAdmin/Delete
+        // GET: User/Delete
         [Authorize(Roles = "admin")]
         public async Task<IActionResult> Delete(string id)
         {
-            if (id == null || _context.UserAdmin == null)
+            if (id == null || _context.User == null)
             {
                 return NotFound();
             }
 
-            var user = await _context.UserAdmin
+            var user = await _context.User
                 .FirstOrDefaultAsync(m => m.Id == id);
             if (user == null)
             {
@@ -140,20 +142,20 @@ namespace RazorLibraryProject.Controllers
             return View(user);
         }
 
-        // POST: UserAdmin/Delete
+        // POST: User/Delete
         [HttpPost, ActionName("Delete")]
         [Authorize(Roles = "admin")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(string id)
         {
-            if (_context.UserAdmin == null)
+            if (_context.User == null)
             {
-                return Problem("Entity set 'ApplicationDbContext.UserAdmin'  is null.");
+                return Problem("Entity set 'ApplicationDbContext.User'  is null.");
             }
-            var user = await _context.UserAdmin.FindAsync(id);
+            var user = await _context.User.FindAsync(id);
             if (user != null)
             {
-                _context.UserAdmin.Remove(user);
+                _context.User.Remove(user);
             }
 
             await _context.SaveChangesAsync();
@@ -163,7 +165,7 @@ namespace RazorLibraryProject.Controllers
         [Authorize(Roles = "admin")]
         private bool UserExists(string id)
         {
-            return (_context.UserAdmin?.Any(e => e.Id == id)).GetValueOrDefault();
+            return (_context.User?.Any(e => e.Id == id)).GetValueOrDefault();
         }
     }
 }

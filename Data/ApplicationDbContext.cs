@@ -13,7 +13,7 @@ namespace RazorLibraryProject.Data
         {
         }
         public DbSet<Book> Book { get; set; } = default!;
-        public DbSet<IdentityUser> UserAdmin { get; set; } = default!;
+        public DbSet<User> User { get; set; } = default!;
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -22,9 +22,9 @@ namespace RazorLibraryProject.Data
             List<string> Guids = new List<string>(new string[] { Guid.NewGuid().ToString(), Guid.NewGuid().ToString(), Guid.NewGuid().ToString(), Guid.NewGuid().ToString() });
             modelBuilder.Entity<IdentityRole>().HasData(new IdentityRole { Id = Guids[0], Name = "admin", NormalizedName = "ADMIN" });
             modelBuilder.Entity<IdentityRole>().HasData(new IdentityRole { Id = Guids[1], Name = "borrower", NormalizedName = "BORROWER" });
-            PasswordHasher<IdentityUser> hasher = new PasswordHasher<IdentityUser>();
+            PasswordHasher<User> hasher = new PasswordHasher<User>();
             ////We'll start with all the necessary info for a borrower and create a default borrower for demo purposes
-            var basicBorrower = new IdentityUser
+            User basicBorrower = new User
             {
                 UserName = "borrower@library.net",
                 NormalizedUserName = "borrower@library.net".ToLower(),
@@ -34,11 +34,11 @@ namespace RazorLibraryProject.Data
                 EmailConfirmed = true
             };
             basicBorrower.PasswordHash = hasher.HashPassword(basicBorrower, "(IAmBut1LowlyBorrower)");
-            modelBuilder.Entity<IdentityUser>().HasData(basicBorrower);
+            modelBuilder.Entity<User>().HasData(basicBorrower);
             modelBuilder.Entity<IdentityUserRole<string>>().HasData(new IdentityUserRole<string> { RoleId = Guids[1], UserId = Guids[2] });
 
             /////Then,the librarian, who will have the admin role
-            var librarian = new IdentityUser
+            User librarian = new User
             {
                 UserName = "librarian@library.net",
                 NormalizedUserName = "librarian@library.net".ToLower(),
@@ -48,18 +48,19 @@ namespace RazorLibraryProject.Data
                 EmailConfirmed = true
             };
             librarian.PasswordHash = hasher.HashPassword(librarian, "(1DoesNotSimplyWalkIntoTheLibrary)");
-            modelBuilder.Entity<IdentityUser>().HasData(librarian);
+            modelBuilder.Entity<User>().HasData(librarian);
             modelBuilder.Entity<IdentityUserRole<string>>().HasData(new IdentityUserRole<string> { RoleId = Guids[0], UserId = Guids[3] });
 
             //On to the regular users
-            IdentityUser fakeBorrower = new IdentityUser();
-            Faker<IdentityUser> user = new Faker<IdentityUser>().RuleFor(m => m.Id, f => Guid.NewGuid().ToString())
+            User fakeBorrower = new User();
+            Faker<User> user = new Faker<User>().RuleFor(m => m.Id, f => Guid.NewGuid().ToString())
                 .RuleFor(m => m.UserName, f => f.Person.UserName)
                 .RuleFor(m => m.Email, f => f.Person.UserName.ToLower() + "@library.net")
                 .RuleFor(m => m.PasswordHash, f => hasher.HashPassword(fakeBorrower, "(IAmBut1LowlyBorrower)"))
-                .RuleFor(m => m.PhoneNumber, f => f.Person.Phone);
+                .RuleFor(m => m.PhoneNumber, f => f.Person.Phone)
+                .RuleFor(m => m.NormalizedUserName, f => f.Person.UserName.ToLower());
 
-            modelBuilder.Entity<IdentityUser>().HasData(user.GenerateBetween(1, 20));
+            modelBuilder.Entity<User>().HasData(user.GenerateBetween(1, 20));
 
             //And some books
             Faker<Book> book = new Faker<Book>().RuleFor<int>(m => m.Id, f => ++f.IndexVariable)

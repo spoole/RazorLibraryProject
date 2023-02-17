@@ -1,17 +1,19 @@
 ﻿@using Microsoft.AspNetCore.Identity
 @inject SignInManager<IdentityUser> SignInManager
 @inject UserManager<IdentityUser> UserManager
-@model IdentityUser
+@model RazorLibraryProject.Models.User
 
 @{
     ViewData["Title"] = "Create";
+    Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
 @{
+    RazorLibraryProject.Models.User newUser = new RazorLibraryProject.Models.User();
     if (SignInManager.IsSignedIn(User) && User.IsInRole("admin")) {
 <h1>Create</h1>
 
-<h4>Book</h4>
+<h4>User</h4>
 <hr />
 <div class="row">
     <div class="col-md-4">
@@ -36,7 +38,22 @@
                 <label asp-for="PasswordHash" class="control-label"></label>
                         <input type="password" asp-for="PasswordHash" class="form-control" />
                         <span asp-validation-for="PasswordHash" class="text-danger"></span>
-            </div>            
+            </div>
+                    <div class="form-group">
+                        <fieldset name="role" style="border-block-style:solid;border-color:black;border-width:thin;"><br>
+                        <tr>
+                            <td>
+                                <label for="librarian">Librarian</label>
+                                <input type="radio" id="librarian" name="role" value="admin"/>
+                           </td>
+                            <td>
+                                <label for="borrower">Borrower</label>
+                                <input type="radio" id="borrower" name="role" value="borrower" checked/>
+                            </td>
+                        </tr>                    
+                </fieldset>
+                    </div>
+
             <div class="form-group">
                 <input type="submit" value="Create" class="btn btn-primary" />
             </div>
