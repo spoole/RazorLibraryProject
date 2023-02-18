@@ -1,4 +1,7 @@
-﻿namespace RazorLibraryProject.Models
+﻿using Microsoft.EntityFrameworkCore;
+using RazorLibraryProject.Data;
+
+namespace RazorLibraryProject.Models
 {
     public class Book
     {
@@ -9,5 +12,6 @@
         public string AuthorFirst { get; set; }
         public string? Description { get; set; }
         public bool isAvailable { get; set; }
+        public string whoHas { get; set; }
     }
 }

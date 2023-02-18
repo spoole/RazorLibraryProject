@@ -68,7 +68,8 @@ namespace RazorLibraryProject.Data
                 .RuleFor(m => m.AuthorLast, f => f.Person.LastName)
                 .RuleFor(m => m.AuthorFirst, f => f.Person.FirstName)
                 .RuleFor(m => m.Description, f => f.Lorem.Paragraph())
-                .RuleFor(m => m.isAvailable, f => f.Random.Bool());
+                .RuleFor(m => m.isAvailable, f => f.Random.Bool())
+                .RuleFor(m => m.whoHas, f => "admin");
             modelBuilder.Entity<Book>().HasData(book.GenerateBetween(10, 50));
         }
     }

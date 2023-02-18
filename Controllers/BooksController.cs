@@ -9,6 +9,7 @@ using Microsoft.AspNetCore.Identity;
 using RazorLibraryProject.Models;
 using RazorLibraryProject.Data;
 using Microsoft.AspNetCore.Authorization;
+using Newtonsoft.Json;
 
 namespace RazorLibraryProject.Controllers
 {
@@ -110,6 +111,30 @@ namespace RazorLibraryProject.Controllers
                 return RedirectToAction(nameof(Index));
             }
             return View(book);
+        }
+
+        // POST: Books/Index/#
+        [HttpPost]
+        [Authorize(Roles = "borrower, admin")]
+        public async Task<IActionResult> Index(int id)
+        {
+            Book book = _context.Book.FirstOrDefault(x => x.Id == id);
+            if (ModelState.IsValid)
+            {
+                if (book.whoHas == "admin" && book.isAvailable)
+                {
+                    book.whoHas = "borrower";
+                    book.isAvailable = !book.isAvailable;
+                }
+                else if (book.whoHas == "borrower" && !book.isAvailable)
+                {
+                    book.whoHas = "admin";
+                    book.isAvailable = !book.isAvailable;
+                }
+                _context.Update(book);
+                _context.SaveChanges();
+            }
+            return RedirectToAction(nameof(Index));
         }
 
         // GET: Books/Delete
