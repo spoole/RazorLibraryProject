@@ -49,9 +49,15 @@ namespace RazorLibraryProject.Controllers
         }
 
         [Authorize(Roles = "admin")]
-        public IActionResult Edit(Book book)
+        public async Task<IActionResult> Edit(int id)
         {
-            book = _context.Book.First(x => x.Id == book.Id);
+            var book = await _context.Book
+                .FirstOrDefaultAsync(m => m.Id == id);
+            if (book == null)
+            {
+                return NotFound();
+            }
+
             return View(book);
         }
 
@@ -84,13 +90,8 @@ namespace RazorLibraryProject.Controllers
         [HttpPost]
         [Authorize(Roles = "admin")]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit([Bind("Id,Title,AuthorLast,AuthorFirst,Description,isAvailable")] Book book, int id)
+        public async Task<IActionResult> Edit([Bind("Id,Title,AuthorLast,AuthorFirst,Description,isAvailable,whoHas")] Book book)
         {
-            if (id != book.Id)
-            {
-                return NotFound();
-            }
-
             if (ModelState.IsValid)
             {
                 try { 
@@ -124,12 +125,16 @@ namespace RazorLibraryProject.Controllers
                 if (book.whoHas == "admin" && book.isAvailable)
                 {
                     book.whoHas = "borrower";
-                    book.isAvailable = !book.isAvailable;
+                    book.isAvailable = false;
                 }
                 else if (book.whoHas == "borrower" && !book.isAvailable)
                 {
                     book.whoHas = "admin";
                     book.isAvailable = !book.isAvailable;
+                } else //Weird cases where bogus left us with admin having checked out a book... librarians read!
+                {
+                    book.whoHas = "admin";
+                    book.isAvailable = true;
                 }
                 _context.Update(book);
                 _context.SaveChanges();
@@ -141,11 +146,6 @@ namespace RazorLibraryProject.Controllers
         [Authorize(Roles = "admin")]
         public async Task<IActionResult> Delete(int id)
         {
-            if (id == null || _context.Book == null)
-            {
-                return NotFound();
-            }
-
             var book = await _context.Book
                 .FirstOrDefaultAsync(m => m.Id == id);
             if (book == null)

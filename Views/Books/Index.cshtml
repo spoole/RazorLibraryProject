@@ -92,7 +92,7 @@
                                 <P><a asp-action="Delete" asp-route-id="@item.Id"> Delete</a></p><br />
                                 <form method="post">
                                     <div hidden>@Html.DisplayNameFor(modelitem => item.Id)</div>
-                                    <button type="submit" asp-page-handler="Index" id="Index" asp-route-id="@item.Id" >Check In</button> 
+                                    <button type="submit" id="Index" asp-route-id="@item.Id">Check In/Out</button> 
                                 </form>
                             </td>
                         </tr>
